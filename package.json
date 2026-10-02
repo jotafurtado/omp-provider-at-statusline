@@ -1,0 +1,43 @@
+{
+  "name": "omp-provider-at-statusline",
+  "version": "1.0.0",
+  "description": "Displays the sanitized friendly provider name on the native Oh My Pi statusline.",
+  "type": "module",
+  "main": "index.ts",
+  "files": [
+    "index.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "omp",
+    "omp-extension",
+    "omp-plugin",
+    "oh-my-pi",
+    "statusline",
+    "provider"
+  ],
+  "author": "João C. Furtado (@jotafurtado)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jotafurtado/omp-provider-at-statusline.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jotafurtado/omp-provider-at-statusline/issues"
+  },
+  "homepage": "https://github.com/jotafurtado/omp-provider-at-statusline#readme",
+  "scripts": {
+    "test": "bun test"
+  },
+  "omp": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
