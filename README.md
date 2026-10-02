@@ -6,11 +6,11 @@ Pairs cleanly alongside the native `model` segment, giving you clear separation 
 
 ## Features
 
-- **Clean Provider Names**: Strips extraneous parenthetical metadata (e.g. `Antigravity` instead of `Antigravity (Gemini 3, Claude, GPT-OSS)` or `Xiaomi Token Plan` instead of `Xiaomi Token Plan (Singapore)`).
-- **Special Case Mapping**: Maps `openai-codex` directly to the concise label `ChatGPT Plus/Pro`.
+- **Built-in Suggested Dictionary**: Ships with pre-configured clean labels for all official Oh My Pi providers without requiring regular expression workarounds.
+- **Custom Overrides (`/provider-rename`)**: Modify any provider name interactively or directly in `~/.omp/provider-names.json`.
+- **Clean Default Labels**: Maps `openai-codex` to `ChatGPT Plus/Pro`, `google-antigravity` to `Antigravity`, `xiaomi-token-plan-sgp` to `Xiaomi Token Plan`, and so on.
 - **Native Synergy**: Designed to precede the native `model` segment in `leftSegments`, keeping thinking levels, effort indicators, and model names rendered natively by omp.
 - **Zero Runtime Dependencies**: Lightweight and fast, consuming host APIs directly without external overhead.
-
 ## Installation
 
 Install via the omp plugin manager:
@@ -40,6 +40,23 @@ statusLine:
     - git
   compactThinkingLevel: false
   showHookStatus: false
+```
+## Command: `/provider-rename`
+
+Rename providers on the fly directly inside your omp sessions:
+
+- `/provider-rename <new-name>`: Renames the provider of your currently active model.
+- `/provider-rename <provider-id> <new-name>`: Sets a custom display name for any specific provider ID.
+- `/provider-rename reset [provider-id]`: Resets a provider back to the built-in default.
+- `/provider-rename list`: Lists all custom aliases configured on your machine.
+
+Custom overrides are persisted to `~/.omp/provider-names.json`:
+
+```json
+{
+  "google-antigravity": "Gemini",
+  "anthropic": "Claude AI"
+}
 ```
 
 ## Preview

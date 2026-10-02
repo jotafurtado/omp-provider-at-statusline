@@ -1,6 +1,6 @@
 {
   "name": "omp-provider-at-statusline",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Displays the sanitized friendly provider name on the native Oh My Pi statusline.",
   "type": "module",
   "main": "index.ts",
