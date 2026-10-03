@@ -2,7 +2,12 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { getProviderDefinition } from "@oh-my-pi/pi-ai";
-import type { ExtensionAPI, ExtensionCommandContext, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import type {
+  ExtensionAPI,
+  ExtensionCommandContext,
+  ExtensionContext,
+  ExtensionUISelectOption,
+} from "@oh-my-pi/pi-coding-agent";
 
 const STATUS_KEY = "omp-provider-at-statusline";
 const CONFIG_FILE_NAME = "provider-names.json";
@@ -124,7 +129,7 @@ export function loadCustomProviderNames(configPath = getCustomConfigPath()): Rec
       return result;
     }
   } catch {
-    // Retorna vazio caso o arquivo esteja corrompido ou inacessível
+    // Retorna vazio caso o arquivo esteja corrompido ou inacessivel
   }
   return {};
 }
@@ -167,6 +172,55 @@ export function resolveProviderName(
     return DEFAULT_PROVIDER_NAMES[providerId];
   }
   return getProviderDefinition(providerId)?.name || providerId;
+}
+
+export function getSelectableProviders(ctx: ExtensionContext): ExtensionUISelectOption[] {
+  const currentProvider = ctx.models.current()?.provider;
+  const customNames = loadCustomProviderNames();
+  const sessionProviders = new Set<string>();
+
+  try {
+    const list = ctx.models.list?.() ?? [];
+    for (const m of list) {
+      if (m?.provider) {
+        sessionProviders.add(m.provider);
+      }
+    }
+  } catch {
+    // Falha silenciosa
+  }
+
+  const allProviderIds = new Set<string>();
+  if (currentProvider) {
+    allProviderIds.add(currentProvider);
+  }
+  for (const id of sessionProviders) {
+    allProviderIds.add(id);
+  }
+  for (const id of Object.keys(customNames)) {
+    allProviderIds.add(id);
+  }
+  for (const id of Object.keys(DEFAULT_PROVIDER_NAMES)) {
+    allProviderIds.add(id);
+  }
+
+  const options: ExtensionUISelectOption[] = [];
+  for (const providerId of allProviderIds) {
+    const currentName = resolveProviderName(providerId, customNames);
+    const tags: string[] = [];
+    if (providerId === currentProvider) {
+      tags.push("active");
+    } else if (sessionProviders.has(providerId)) {
+      tags.push("configured");
+    }
+    const tagSuffix = tags.length > 0 ? ` [${tags.join(", ")}]` : "";
+    options.push({
+      label: providerId,
+      description: `Display: "${currentName}"${tagSuffix}`,
+    });
+  }
+
+  return options;
 }
 
 let lastStatusText: string | undefined = undefined;
@@ -228,12 +282,46 @@ export async function handleProviderRenameCommand(
     return;
   }
 
+  // Modo interativo: quando invocado sem argumentos no modo TUI com suporte a diálogo
+  if (!raw && ctx.hasUI && typeof ctx.ui.select === "function" && typeof ctx.ui.input === "function") {
+    const options = getSelectableProviders(ctx);
+    const selectedProvider = await ctx.ui.select("Select a provider to rename:", options);
+
+    if (!selectedProvider) {
+      return;
+    }
+
+    const currentName = resolveProviderName(selectedProvider);
+    const inputPrompt = `New display name for "${selectedProvider}" (or "reset"):`;
+    const newName = await ctx.ui.input(inputPrompt, currentName);
+
+    if (newName === undefined) {
+      return;
+    }
+
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === "reset") {
+      deleteCustomProviderName(selectedProvider);
+      lastStatusText = undefined;
+      updateStatus(ctx);
+      const fallback = resolveProviderName(selectedProvider);
+      ctx.ui.notify(`Reset "${selectedProvider}" to default: "${fallback}".`, "info");
+      return;
+    }
+
+    saveCustomProviderName(selectedProvider, trimmed);
+    lastStatusText = undefined;
+    updateStatus(ctx);
+    ctx.ui.notify(`Renamed provider "${selectedProvider}" to "${trimmed}".`, "info");
+    return;
+  }
+
   if (!raw) {
     const currentId = currentModel?.provider;
     const currentName = currentId ? resolveProviderName(currentId) : undefined;
     const helpMsg = currentId
-      ? `Active provider: ${currentId} ("${currentName}")\nUsage:\n  /provider-rename <new-name>\n  /provider-rename <provider-id> <new-name>\n  /provider-rename reset [provider-id]\n  /provider-rename list`
-      : "Usage:\n  /provider-rename <provider-id> <new-name>\n  /provider-rename reset [provider-id]\n  /provider-rename list";
+      ? `Active provider: ${currentId} ("${currentName}")\nUsage:\n  /provider-rename\n  /provider-rename <new-name>\n  /provider-rename <provider-id> <new-name>\n  /provider-rename reset [provider-id]\n  /provider-rename list`
+      : "Usage:\n  /provider-rename\n  /provider-rename <provider-id> <new-name>\n  /provider-rename reset [provider-id]\n  /provider-rename list";
     ctx.ui.notify(helpMsg, "info");
     return;
   }

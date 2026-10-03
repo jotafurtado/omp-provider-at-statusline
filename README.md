@@ -43,13 +43,13 @@ statusLine:
 ```
 ## Command: `/provider-rename`
 
-Rename providers on the fly directly inside your omp sessions:
+Run `/provider-rename` interactively or with quick arguments:
 
-- `/provider-rename <new-name>`: Renames the provider of your currently active model.
+- `/provider-rename`: Opens an interactive selector overlay listing all available and configured providers, followed by a text prompt to input the new name.
+- `/provider-rename <new-name>`: Quickly renames the provider of your currently active model.
 - `/provider-rename <provider-id> <new-name>`: Sets a custom display name for any specific provider ID.
 - `/provider-rename reset [provider-id]`: Resets a provider back to the built-in default.
 - `/provider-rename list`: Lists all custom aliases configured on your machine.
-
 Custom overrides are persisted to `~/.omp/provider-names.json`:
 
 ```json

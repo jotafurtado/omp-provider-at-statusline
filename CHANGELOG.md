@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Built-in suggested provider dictionary (`DEFAULT_PROVIDER_NAMES`) covering all official Oh My Pi providers without regex stripping.
-- `/provider-rename` slash command to set, inspect, and reset custom provider aliases.
+- `/provider-rename` slash command with interactive provider selection and rename input dialogs, plus quick CLI arguments.
 - Persistent custom overrides via `~/.omp/provider-names.json`.
 
 ## [1.0.0] - 2026-10-02
