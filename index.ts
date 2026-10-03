@@ -106,6 +106,7 @@ export const DEFAULT_PROVIDER_NAMES: Record<string, string> = {
   "mistral": "Mistral",
   "openai": "OpenAI",
   "web": "Web",
+  "kiro": "Kiro",
 };
 
 export function getCustomConfigPath(): string {
